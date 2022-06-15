@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjectDipMVC.Models;
 using Microsoft.AspNetCore.Authorization;
+using System.Web;
+using Microsoft.Data.SqlClient;
 
 namespace ProjectDipMVC.Controllers
 {
@@ -21,8 +23,14 @@ namespace ProjectDipMVC.Controllers
         }
 
         // GET: ProjectDescripts
-        public async Task<IActionResult> Index(int ProjectId)
+        public async Task<IActionResult> Index(int? ProjectId)
         {
+
+            if (ProjectId == null)
+            {
+                return NotFound();
+            }
+
             var projectDipContext = _context.ProjectDescripts.Include(p => p.Project).
                 Include(p => p.User).Where(p=> p.ProjectId == ProjectId);
             ViewBag.ProjectId = ProjectId;
@@ -50,11 +58,21 @@ namespace ProjectDipMVC.Controllers
         }
 
         // GET: ProjectDescripts/Create
-        public async Task<IActionResult> Create(int ProjectId)        {
+        public async Task<IActionResult> Create(int? ProjectId)        {
             //var lstProjects = _context.Projects.Where(p => p.ProjectId == ProjectId).ToListAsync().Result;
             //ViewData["ProjectId"] = new SelectList(lstProjects, "ProjectId", "Name");
+            if (null == ProjectId)
+            {
+                return NotFound();
+            }
+
+            if( null == _context.Projects.Find(ProjectId))
+            {
+                return NotFound();
+            }
+
             ViewBag.ProjectId = ProjectId;
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Login");
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserName");
             return View();
         }
 
@@ -63,18 +81,54 @@ namespace ProjectDipMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(/*[Bind("ProjDscrptId,SectionName,SectionNumber,UserId,ProjectId")]*/ 
+        public async Task<IActionResult> Create([Bind("ProjDscrptId,SectionName,SectionNumber,UserId,ProjectId")]
         ProjectDescript projectDescript)
         {
-            //if (ModelState.IsValid)
-            //{
-                _context.Add(projectDescript);
+            if (null == _context.Projects.Find(projectDescript.ProjectId))
+            {
+                return NotFound();
+            }
+
+            bool isWrong = false;
+
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserName", projectDescript.UserId);
+            var lstProjects = _context.Projects.Where(p => p.ProjectId == projectDescript.ProjectId).First();
+            ViewData["ProjectId"] = lstProjects.ProjectId;
+
+            if (String.IsNullOrEmpty(projectDescript.SectionName))
+            {
+                ModelState.AddModelError("SectionName", "Введите название секции");
+                isWrong = true;
+            }
+
+            if (projectDescript.SectionNumber <= 0)
+            {
+                ModelState.AddModelError("SectionNumber", "Введите корректный номер секции");
+                isWrong = true;
+            }
+
+            if (null == (_context.Users.Find(projectDescript.UserId)))
+            {
+                ModelState.AddModelError("UserId", "Выберите редактора");
+                isWrong = true;
+            }
+
+            if (isWrong)
+            {
+                return View(projectDescript);
+            }
+
+            _context.Add(projectDescript);
+            try
+            {
                 await _context.SaveChangesAsync();
+            }catch (DbUpdateException)
+            {
+                ModelState.AddModelError("SectionNumber", "Секция с таким номером уже занята");
+                return View(projectDescript);
+            }
             return RedirectToAction(nameof(Index), new { ProjectId = projectDescript.ProjectId });
-            //}
-            //ViewData["ProjectId"] = new SelectList(_context.Projects, "ProjectId", "ProjectId", projectDescript.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Login", projectDescript.UserId);
-            //return View(projectDescript);
+           
         }
 
         // GET: ProjectDescripts/Edit/5
@@ -85,6 +139,7 @@ namespace ProjectDipMVC.Controllers
                 return NotFound();
             }
 
+
             var projectDescript = await _context.ProjectDescripts.FindAsync(id);
             if (projectDescript == null)
             {
@@ -93,7 +148,7 @@ namespace ProjectDipMVC.Controllers
             //var lstProjects = _context.Projects.Where(p => p.ProjectId == projectDescript.ProjectId).
             //    ToListAsync().Result;
             //ViewData["ProjectId"] = new SelectList(lstProjects, "ProjectId", "Name", projectDescript.ProjectId);
-            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "Login", projectDescript.UserId);
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserName", projectDescript.UserId);
             return View(projectDescript);
         }
 
@@ -109,13 +164,49 @@ namespace ProjectDipMVC.Controllers
                 return NotFound();
             }
 
-            //if (ModelState.IsValid)
-            //{
+            bool isWrong = false;
+
+            ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserName", projectDescript.UserId);
+            var lstProjects = _context.Projects.Where(p => p.ProjectId == projectDescript.ProjectId).First();
+            ViewData["ProjectId"] = lstProjects.ProjectId;
+
+            if (String.IsNullOrEmpty(projectDescript.SectionName))
+            {
+                ModelState.AddModelError("SectionName", "Введите название секции");
+                isWrong = true;
+            }
+
+            if (projectDescript.SectionNumber <= 0)
+            {
+                ModelState.AddModelError("SectionNumber", "Введите корректный номер секции");
+                isWrong = true;
+            }
+
+            if (null == (_context.Users.Find(projectDescript.UserId)))
+            {
+                ModelState.AddModelError("UserId", "Выберите редактора");
+                isWrong = true;
+            }
+
+            if (isWrong)
+            {
+                return View(projectDescript);
+            }
+
             var ProjectId = projectDescript.ProjectId;
                 try
                 {
-                    _context.Update(projectDescript);
-                    await _context.SaveChangesAsync();
+                    try
+                    {
+
+                        _context.Update(projectDescript);
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateException)
+                    {
+                        ModelState.AddModelError("SectionNumber", "Секция с таким номером уже занята");
+                        return View(projectDescript);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -129,7 +220,7 @@ namespace ProjectDipMVC.Controllers
                     }
                 }
                 return RedirectToAction(nameof(Index), new { ProjectId = ProjectId });
-            //}
+
             //ViewData["ProjectId"] = new SelectList(_context.Projects, "ProjectId", "ProjectId", projectDescript.ProjectId);
             //ViewData["UserId"] = new SelectList(_context.Users, "UserId", "UserId", projectDescript.UserId);
             //return View(projectDescript);
@@ -162,7 +253,7 @@ namespace ProjectDipMVC.Controllers
         {
             if (_context.ProjectDescripts == null)
             {
-                return Problem("Entity set 'ProjectDipContext.ProjectDescripts'  is null.");
+                return Problem("Ошибка");
             }
             var projectDescript = await _context.ProjectDescripts.FindAsync(id);
             var ProjectId = projectDescript.ProjectId;
@@ -170,8 +261,20 @@ namespace ProjectDipMVC.Controllers
             {
                 _context.ProjectDescripts.Remove(projectDescript);
             }
-            
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                projectDescript = await _context.ProjectDescripts
+                .Include(p => p.Project)
+                .Include(p => p.User)
+                .FirstOrDefaultAsync(m => m.ProjDscrptId == id);
+                TempData["ErrMessage"] = "Удаление невозможно - убедитесь, что отсутствуют секции, связанные с данной задачей";
+                return View(projectDescript);
+            }
             return RedirectToAction(nameof(Index), new { ProjectId = ProjectId });
         }
 

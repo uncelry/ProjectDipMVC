@@ -100,7 +100,7 @@ namespace ProjectDipMVC.Controllers
 
                 await _userManager.RemoveFromRolesAsync(user, removedRoles);
                 
-                await _signInManager.RefreshSignInAsync(user);
+                //await _signInManager.RefreshSignInAsync(user);
 
                 return RedirectToAction("UserList");
             }

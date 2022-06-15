@@ -1,11 +1,11 @@
 ﻿@model IEnumerable<ProjectDipMVC.Models.ProjectDescript>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Задачи по секциям";
     var ProjectId = (int)ViewBag.ProjectId;
 }
 
-<h1>Index</h1>
+<h1>Задачи по секциям</h1>
 
 <p>
     @Html.ActionLink("Добавить секцию", "Create", "ProjectDescripts", new {ProjectId = ViewBag.ProjectId})
@@ -15,16 +15,20 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.SectionName)
+                @*@Html.DisplayNameFor(model => model.SectionName)*@
+                Название секции
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.SectionNumber)
+                @*@Html.DisplayNameFor(model => model.SectionNumber)*@
+                Номер секции
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Project)
+                @*@Html.DisplayNameFor(model => model.Project)*@
+                Проект
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.User)
+                @*@Html.DisplayNameFor(model => model.User)*@
+                Редактор
             </th>
             <th></th>
         </tr>
@@ -42,12 +46,12 @@
                 @Html.DisplayFor(modelItem => item.Project.Name)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.User.Login)
+                @Html.DisplayFor(modelItem => item.User.UserName)
             </td>
             <td>
-                <a asp-action="Edit" asp-route-id="@item.ProjDscrptId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.ProjDscrptId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.ProjDscrptId">Delete</a>
+                <a asp-action="Edit" asp-route-id="@item.ProjDscrptId">Изменить</a> |
+                <a asp-action="Details" asp-route-id="@item.ProjDscrptId">Подробности</a> |
+                <a asp-action="Delete" asp-route-id="@item.ProjDscrptId">Удалить</a>
             </td>
         </tr>
 }

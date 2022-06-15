@@ -3,14 +3,14 @@
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Добро пожаловать!</h1>
+    <p>Вы находитесь на главной странице. <br />Чтобы воспользоваться функционалом проекта, пожалуйста, перейдите на соответствующую вкладку меню!</p>
 
 </div>
 
 @if (User.Identity.IsAuthenticated)
 {
-    <p>@User.Identity.Name</p>
+    <p>Вы вошли как <b>@User.Identity.Name</b>!</p>
 
     <form method="post" asp-controller="Account" asp-action="Logout">
         <input type="submit" value="Выход" />

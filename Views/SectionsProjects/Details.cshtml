@@ -1,48 +1,52 @@
 ﻿@model ProjectDipMVC.Models.SectionsProject
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Подробности";
 }
 
-<h1>Details</h1>
+<h1>Подробности</h1>
 
 <div>
-    <h4>SectionsProject</h4>
+    <h4>Секция проекта</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NameSections)
+        <dt class="col-sm-2">
+            @*@Html.DisplayNameFor(model => model.NameSections)*@
+            Название секции
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NameSections)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NumberSections)
+        <dt class="col-sm-2">
+            @*@Html.DisplayNameFor(model => model.NumberSections)*@
+            Номер секции
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NumberSections)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.NameFileSections)
+        <dt class="col-sm-2">
+            @*@Html.DisplayNameFor(model => model.NameFileSections)*@
+            Файл секции
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.NameFileSections)
         </dd>
-        <dt class = "col-sm-2">
+        @*<dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.FileSections)
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.FileSections)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ProjDscrpt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ProjDscrpt.ProjDscrptId)
-        </dd>
+        </dd>*@
+    <dt class="col-sm-2">
+        @*@Html.DisplayNameFor(model => model.ProjDscrpt)*@
+        ID задания
+    </dt>
+    <dd class="col-sm-10">
+        @Html.DisplayFor(model => model.ProjDscrpt.ProjDscrptId)
+    </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model?.SectionsId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <a asp-action="Edit" asp-route-id="@Model?.SectionsId">Изменить</a> |
+    <a asp-action="Index">Список секций</a>
 </div>

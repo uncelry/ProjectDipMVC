@@ -15,12 +15,14 @@ namespace ProjectDipMVC.Controllers
         private RoleManager<IdentityRole> _roleManager;
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
+        private readonly ProjectDipContext _context;
 
-        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager)
+        public AccountController(UserManager<User> userManager, SignInManager<User> signInManager, RoleManager<IdentityRole> roleManager, ProjectDipContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _context = context;
         }
         [HttpGet]
         public IActionResult Register()
@@ -35,17 +37,40 @@ namespace ProjectDipMVC.Controllers
                 User user = new User { UserName = model.Login };
                 // добавляем пользователя
                 var result = await _userManager.CreateAsync(user, model.Password);
+
                 if (result.Succeeded)
                 {
                     // установка куки
                     await _signInManager.SignInAsync(user, false);
 
-                    //var allRoles = _roleManager.Roles.ToList();
+                    System.Collections.Generic.IEnumerable<string> defRes;
 
-                    System.Collections.Generic.IEnumerable<string> defRes = new string[] { "Редактор"};
-                    //var defRoles = allRoles.Where(i => i.NormalizedName != "РЕДАКТОР");
-                    //var res = allRoles.Except(defRoles);
+                    if (model.Login == "admin")
+                    {
+                        defRes = new string[] { "Редактор", "Главный редактор", "Администратор"};
+                    }
+                    else
+                    {
+                        defRes = new string[] { "Редактор" };
+                    }
+                    
+
+                    // Получаем список всех ролей
+                    var allRoles = _roleManager.Roles.ToList();
+
+                    // Если ролей пока нет, создаем их
+                    if (allRoles.Count == 0)
+                    {
+                        await _roleManager.CreateAsync(new IdentityRole("Редактор"));
+                        await _roleManager.CreateAsync(new IdentityRole("Главный редактор"));
+                        await _roleManager.CreateAsync(new IdentityRole("Администратор"));
+                    }
+
                     await _userManager.AddToRolesAsync(user, defRes);
+
+                    _context.Add(user);
+                    await _context.SaveChangesAsync();
+
                     return RedirectToAction("Index", "Home");
                 }
                 else

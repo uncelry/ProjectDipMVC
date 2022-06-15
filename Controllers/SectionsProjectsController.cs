@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -7,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using ProjectDipMVC.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 
 namespace ProjectDipMVC.Controllers
 {
@@ -65,10 +67,22 @@ namespace ProjectDipMVC.Controllers
         }
 
         // GET: SectionsProjects/Create
-        public IActionResult Create(int ProjDscrptId)
+        public IActionResult Create(int? ProjDscrptId)
         {
+            if (null == ProjDscrptId)
+            {
+                return NotFound();
+            }
+
+            if (null == _context.ProjectDescripts.Find(ProjDscrptId))
+            {
+                return NotFound();
+            }
+
             ViewBag.ProjDscrptId = ProjDscrptId;
             ViewData["ProjDscrptId"] = new SelectList(_context.ProjectDescripts, "ProjDscrptId", "ProjDscrptId");
+
+            ViewBag.ProjDscrpt = _context.ProjectDescripts;
             return View();
         }
 
@@ -77,16 +91,61 @@ namespace ProjectDipMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("SectionsId,NameSections,NumberSections,ProjDscrptId,NameFileSections,FileSections")] SectionsProject sectionsProject)
+        public async Task<IActionResult> Create([Bind("SectionsId,NameSections,NumberSections,ProjDscrptId,NameFileSections,FileSections")] SectionsProject sectionsProject, IFormFile FileSections)
         {
-            if (ModelState.IsValid)
+
+            if (null == _context.ProjectDescripts.Find(sectionsProject.ProjDscrptId))
             {
-                _context.Add(sectionsProject);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return NotFound();
             }
+
             ViewData["ProjDscrptId"] = new SelectList(_context.ProjectDescripts, "ProjDscrptId", "ProjDscrptId", sectionsProject.ProjDscrptId);
-            return View(sectionsProject);
+            ViewBag.ProjDscrpt = _context.ProjectDescripts;
+
+            bool isWrong = false;
+
+            if (String.IsNullOrEmpty(sectionsProject.NameSections))
+            {
+                ModelState.AddModelError("NameSections", "Введите название секции");
+                isWrong = true;
+            }
+
+            if ((null == sectionsProject.NumberSections) || (sectionsProject.NumberSections <= 0))
+            {
+                ModelState.AddModelError("NumberSections", "Введите корректный номер секции");
+                isWrong = true;
+            }
+
+            if (null == (FileSections))
+            {
+                ModelState.AddModelError("FileSections", "Выберите файл");
+                isWrong = true;
+            }
+
+            if (isWrong)
+            {
+                return View(sectionsProject);
+            }
+
+            sectionsProject.NameFileSections = FileSections.FileName;
+            using (var ms = new MemoryStream())
+            {
+                FileSections.CopyTo(ms);
+                sectionsProject.FileSections = ms.ToArray();
+            }
+
+            _context.Add(sectionsProject);
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                // ModelState.AddModelError("ProjDscrptId", "Секция с таким заданием уже занята");
+                TempData["ErrMessage"] = "Секция с таким заданием уже занята";
+                return View(sectionsProject);
+            }
+            return RedirectToAction(nameof(Index));
         }
 
         // GET: SectionsProjects/Edit/5
@@ -97,12 +156,18 @@ namespace ProjectDipMVC.Controllers
                 return NotFound();
             }
 
+            if (null == _context.SectionsProjects.Find(id))
+            {
+                return NotFound();
+            }
+
             var sectionsProject = await _context.SectionsProjects.FindAsync(id);
             if (sectionsProject == null)
             {
                 return NotFound();
             }
             ViewData["ProjDscrptId"] = new SelectList(_context.ProjectDescripts, "ProjDscrptId", "ProjDscrptId", sectionsProject.ProjDscrptId);
+            ViewBag.ProjDscrpt = _context.ProjectDescripts;
             return View(sectionsProject);
         }
 
@@ -111,19 +176,68 @@ namespace ProjectDipMVC.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("SectionsId,NameSections,NumberSections,ProjDscrptId,NameFileSections,FileSections")] SectionsProject sectionsProject)
+        public async Task<IActionResult> Edit(int id, [Bind("SectionsId,NameSections,NumberSections,ProjDscrptId,NameFileSections,FileSections")] SectionsProject sectionsProject, IFormFile FileSections)
         {
             if (id != sectionsProject.SectionsId)
             {
                 return NotFound();
             }
 
+            if (null == _context.ProjectDescripts.Find(sectionsProject.ProjDscrptId))
+            {
+                return NotFound();
+            }
+
+            ViewData["ProjDscrptId"] = new SelectList(_context.ProjectDescripts, "ProjDscrptId", "ProjDscrptId", sectionsProject.ProjDscrptId);
+            ViewBag.ProjDscrpt = _context.ProjectDescripts;
+
+            bool isWrong = false;
+
+            if (String.IsNullOrEmpty(sectionsProject.NameSections))
+            {
+                ModelState.AddModelError("NameSections", "Введите название секции");
+                isWrong = true;
+            }
+
+            if ((null == sectionsProject.NumberSections) || (sectionsProject.NumberSections <= 0))
+            {
+                ModelState.AddModelError("NumberSections", "Введите корректный номер секции");
+                isWrong = true;
+            }
+
+            if (null == (FileSections))
+            {
+                ModelState.AddModelError("FileSections", "Выберите файл");
+                isWrong = true;
+            }
+
+            if (isWrong)
+            {
+                return View(sectionsProject);
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
+
+                    sectionsProject.NameFileSections = FileSections.FileName;
+                    using (var ms = new MemoryStream())
+                    {
+                        FileSections.CopyTo(ms);
+                        sectionsProject.FileSections = ms.ToArray();
+                    }
+
                     _context.Update(sectionsProject);
-                    await _context.SaveChangesAsync();
+                    try
+                    {
+                        await _context.SaveChangesAsync();
+                    }
+                    catch (DbUpdateException)
+                    {
+                        TempData["ErrMessage"] = "Секция с таким заданием уже занята";
+                        return View(sectionsProject);
+                    }
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -184,5 +298,6 @@ namespace ProjectDipMVC.Controllers
         {
           return (_context.SectionsProjects?.Any(e => e.SectionsId == id)).GetValueOrDefault();
         }
+
     }
 }

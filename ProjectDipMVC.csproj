@@ -20,11 +20,15 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Syncfusion.DocIO.Net.Core" Version="20.1.0.59" />
+    <PackageReference Include="Syncfusion.DocIORenderer.Net.Core" Version="20.1.0.59" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Migrations\Application\" />
     <Folder Include="Migrations\ProjectDip\" />
+    <Folder Include="tmp_media\" />
+    <Folder Include="wwwroot\Files\" />
   </ItemGroup>
 
 </Project>

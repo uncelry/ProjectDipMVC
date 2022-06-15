@@ -1,38 +1,42 @@
 ﻿@model ProjectDipMVC.Models.ProjectDescript
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Подробности";
 }
 
-<h1>Details</h1>
+<h1>Подробности</h1>
 
 <div>
-    <h4>ProjectDescript</h4>
+    <h4>Задача по секции</h4>
     <hr />
     <dl class="row">
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SectionName)
+            @*@Html.DisplayNameFor(model => model.SectionName)*@
+            Название секции
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.SectionName)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.SectionNumber)
+        <dt class="col-sm-2">
+            @*@Html.DisplayNameFor(model => model.SectionNumber)*@
+            Номер секции
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.SectionNumber)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Project)
+            @*@Html.DisplayNameFor(model => model.Project)*@
+            Проект
         </dt>
         <dd class = "col-sm-10">
             @Html.DisplayFor(model => model.Project.Name)
         </dd>
         <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
+            @*@Html.DisplayNameFor(model => model.User)*@
+            Редактор
         </dt>
         <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Login)
+            @Html.DisplayFor(model => model.User.UserName)
         </dd>
     </dl>
 </div>

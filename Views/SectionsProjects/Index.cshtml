@@ -1,10 +1,10 @@
 ﻿@model IEnumerable<ProjectDipMVC.Models.SectionsProjectIndex>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Секции";
 }
 
-<h1>Index</h1>
+<h1>Секции</h1>
 @if (!Model.Any() || Model.FirstOrDefault() == null)
 {
     <p style="color:red">
@@ -19,22 +19,28 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Name)
+                @*@Html.DisplayNameFor(model => model.Name)*@
+                Проект
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Section_Name)
+                @*@Html.DisplayNameFor(model => model.Section_Name)*@
+                Название задания
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Section_Number)
+                @*@Html.DisplayNameFor(model => model.Section_Number)*@
+                Номер задания
             </th>            
             <th>
-                @Html.DisplayNameFor(model => model.NameSections)
+                @*@Html.DisplayNameFor(model => model.NameSections)*@
+                Название секции
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.NumberSections)
+                @*@Html.DisplayNameFor(model => model.NumberSections)*@
+                Номер секции
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.NameFileSections)
+                @*@Html.DisplayNameFor(model => model.NameFileSections)*@
+                Файл секции
             </th>            
             <th></th>
         </tr>
@@ -61,18 +67,25 @@
                 @Html.DisplayFor(modelItem => item.NameFileSections)
             </td>            
             <td>
-                        @{
-                            var actNameCreateOrEdit = (null == item.SectionsId) ? "Create" : "Edit";
-                            object routeValCreateOrEdit = (null == item.SectionsId)
-                                ? new { ProjDscrptId = item.ProjDscrptId }
-                                : new { ProjDscrptId = item.ProjDscrptId, SectionsId = item.SectionsId };
-                            var isVisibility = null != item.SectionsId ? "visible" : "hidden";
-                            var separator = null != item.SectionsId ? "|" : string.Empty;
-                        }
-                @Html.ActionLink("Изменить", actNameCreateOrEdit, "SectionsProjects", routeValCreateOrEdit)
-                @*<a asp-action="Edit" asp-route-id="@item?.SectionsId">Edit</a>*@ |
-                <a asp-action="Details" asp-route-id="@item?.SectionsId">Details</a> 
-                @separator <a asp-action="Delete" asp-route-id="@item?.SectionsId" style="visibility:@isVisibility">Удалить</a>                
+                @{
+                    var actNameCreateOrEdit = (null == item.SectionsId) ? "Создать" : "Изменить";
+                    object routeValCreateOrEdit = (null == item.SectionsId)
+                        ? new { ProjDscrptId = item.ProjDscrptId }
+                        : new { ProjDscrptId = item.ProjDscrptId, SectionsId = item.SectionsId };
+                    var isVisibility = null != item.SectionsId ? "visible" : "hidden";
+                    var separator = null != item.SectionsId ? "|" : string.Empty;
+
+                    var myLink = (null == item.SectionsId) ? ("SectionsProjects/create?ProjDscrptId=" + item.ProjDscrptId) : ("SectionsProjects/edit/" + item.SectionsId);
+                }
+                @*@Html.ActionLink("Изменить", actNameCreateOrEdit, "SectionsProjects", routeValCreateOrEdit)*@
+
+
+
+                <a href="@myLink">@actNameCreateOrEdit</a>
+                @*<a asp-action="Edit" asp-route-id="@item?.SectionsId">Edit</a>*@
+                @separator
+                <a asp-action="Details" asp-route-id="@item?.SectionsId" style="visibility:@isVisibility">Подробности</a>
+                @separator <a asp-action="Delete" asp-route-id="@item?.SectionsId" style="visibility:@isVisibility">Удалить</a>
             </td>
         </tr>
 }
