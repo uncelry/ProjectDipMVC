@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using ProjectDipMVC.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 
 namespace ProjectDipMVC.Controllers
 {
@@ -16,16 +17,20 @@ namespace ProjectDipMVC.Controllers
     public class SectionsProjectsController : Controller
     {
         private readonly ProjectDipContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public SectionsProjectsController(ProjectDipContext context)
+        public SectionsProjectsController(UserManager<User> userManager, ProjectDipContext context)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: SectionsProjects
         public async Task<IActionResult> Index()
         {
-            var UserId = 1;
+            System.Security.Claims.ClaimsPrincipal currentUser = this.User;
+            var userName = _userManager.GetUserName(User); // Get user id:
+            var UserId =_context.Users.Where(p => p.UserName == userName).First().UserId;
             var projectDipContext =
             from pd in _context.ProjectDescripts.Include(s => s.Project)
             join p in _context.SectionsProjects on 
