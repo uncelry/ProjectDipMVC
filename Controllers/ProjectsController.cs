@@ -20,7 +20,7 @@ using Syncfusion.OfficeChart;
 namespace ProjectDipMVC.Controllers
 {
 
-    [Authorize(Roles = "Администратор, Гланый редактор")]
+    [Authorize(Roles = "Администратор, Главный редактор")]
     public class ProjectsController : Controller
     {
         private readonly ProjectDipContext _context;
